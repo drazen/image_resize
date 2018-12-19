@@ -1,0 +1,16 @@
+{
+  "name": "image_resize",
+  "version": "1.0.0",
+  "description": "automatically resize images uploaded to s3",
+  "main": "images/oncreate.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Drazen",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.378.0",
+    "gm": "^1.23.1",
+    "serverless-plugin-existing-s3": "^2.3.0"
+  }
+}

@@ -1,0 +1,48 @@
+service: image_resize
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: ${opt:stage, 'dev'}
+  environment:
+    ASSET_BUCKET: ${file(env.yml):${self:provider.stage}.ASSET_BUCKET}
+
+  region: ca-central-1
+  memorySize: 1024
+  timeout: 8
+
+  # Give lambda permissions to read/write images into the s3 bucket under the 'uploads' and 'images' prefixes
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:*"
+      Resource: arn:aws:s3:::${self:provider.environment.ASSET_BUCKET}/uploads/*
+    - Effect: "Allow"
+      Action:
+        - "s3:*"
+      Resource: arn:aws:s3:::${self:provider.environment.ASSET_BUCKET}/images/*
+
+plugins:
+    - serverless-plugin-existing-s3
+
+functions:
+  resizeImage:
+    handler: images/oncreate.resizeImage
+    events:
+      - existingS3:
+          bucket: ${self:provider.environment.ASSET_BUCKET}
+          events: 
+            - s3:ObjectCreated:*
+          rules:
+            - prefix: uploads/
+            - suffix: .jpg
+      # Unfortunately at this time, must define a completeely seperate 'event' to accomodate each suffix type
+      - existingS3:
+          bucket: ${self:provider.environment.ASSET_BUCKET}
+          events: 
+            - s3:ObjectCreated:*
+          rules:
+            - prefix: uploads/
+            - suffix: .png
+
+
